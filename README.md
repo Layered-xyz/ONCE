@@ -1,4 +1,4 @@
-# Layered ONCE (__ON__-__C__hain __E__ntity)
+# Layered ONCE (ON-Chain Entity)
 
 ONCE is the base layer for building on chain organizations.
 
