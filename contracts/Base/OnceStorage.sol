@@ -10,7 +10,11 @@ import { IPluginManager } from '../Plugins/PluginManager/IPluginManager.sol';
 error InitializationFunctionReverted(address _initializationContractAddress, bytes _calldata);
 
 
-
+/**
+ * @title OnceStorage -- A storage library for the ONCE base contract
+ * @author Ketul 'Jay' Patel
+ * @notice OnceStorage allows the ONCE base contract to store access control and plugin information via the diamond storage pattern
+ */
 library OnceStorage {
     using AddressUtils for address;
     using EnumerableSet for EnumerableSet.AddressSet;
@@ -76,7 +80,8 @@ library OnceStorage {
             s.slot := slot
         }
     }
-    /*
+
+    /**
      * @notice query whether role is assigned to account
      * @param role role to query
      * @param account account to query
@@ -94,7 +99,9 @@ library OnceStorage {
      * @notice revert if sender does not have given role
      * @param role role to query
      */
-    function _checkRole(bytes32 role) internal view {
+    function _checkRole(
+        bytes32 role
+    ) internal view {
         _checkRole(role, msg.sender);
     }
 
@@ -103,7 +110,10 @@ library OnceStorage {
      * @param role role to query
      * @param account to query
      */
-    function _checkRole(bytes32 role, address account) internal view {
+    function _checkRole(
+        bytes32 role, 
+        address account
+    ) internal view {
         if (!_hasRole(role, account)) {
             revert(
                 string(
@@ -118,7 +128,7 @@ library OnceStorage {
         }
     }
 
-    /*
+    /**
      * @notice query admin role for given role
      * @param role role to query
      * @return admin role
@@ -135,30 +145,39 @@ library OnceStorage {
      * @param role role to set
      * @param adminRole admin role to set
      */
-    function _setRoleAdmin(bytes32 role, bytes32 adminRole) internal {
+    function _setRoleAdmin(
+        bytes32 role, 
+        bytes32 adminRole
+    ) internal {
         bytes32 previousAdminRole = _getRoleAdmin(role);
         Store storage ds = store();
         ds.roles[role].adminRole = adminRole;
         emit RoleAdminChanged(role, previousAdminRole, adminRole);
     }
 
-    /*
+    /**
      * @notice assign role to given account
      * @param role role to assign
      * @param account recipient of role assignment
      */
-    function _grantRole(bytes32 role, address account) internal {
+    function _grantRole(
+        bytes32 role, 
+        address account
+    ) internal {
         Store storage ds = store();
         ds.roles[role].members.add(account);
         emit RoleGranted(role, account, msg.sender);
     }
 
-    /*
+    /**
      * @notice unassign role from given account
      * @param role role to unassign
-     * @parm account
+     * @param account address to unassign role from
      */
-    function _revokeRole(bytes32 role, address account) internal {
+    function _revokeRole(
+        bytes32 role, 
+        address account
+    ) internal {
         Store storage ds = store();
         ds.roles[role].members.remove(account);
         emit RoleRevoked(role, account, msg.sender);
@@ -168,7 +187,9 @@ library OnceStorage {
      * @notice relinquish role
      * @param role role to relinquish
      */
-    function _renounceRole(bytes32 role) internal {
+    function _renounceRole(
+        bytes32 role
+    ) internal {
         _revokeRole(role, msg.sender);
     }
 

@@ -6,16 +6,36 @@ import { PluginManagerStorage } from "../Plugins/PluginManager/PluginManagerStor
 import { IPluginManager } from "../Plugins/PluginManager/IPluginManager.sol";
 import { IOncePlugin } from "../Interfaces/IOncePlugin.sol";
 
+/**
+ * @title ONCE -- A base layer for on-chain entities
+ * @dev Key concepts
+ *  - ONCE takes inspiration from the diamond proxy pattern
+ *  - The core contract (along with the default plugins) effectively form a permissioned proxy
+ *  - The original vision of ONCE is to create a base layer upon which you can build your organization to evolve over time
+ *  - From a technical perspective this means plugins that install the functionality of current popular on-chain entity solutions
+ *  
+ *  - In the base ONCE storage we keep track of installed plugins and their associated function selectors that can be called
+ *  - We then use the fallback function to find and call the plugin. This leverages the same system as the Diamond Proxy Pattern (EIP-2535)
+ * 
+ *  - By default every ONCE comes with the following plugins which can be uninstalled or upgraded as needed:
+ *  -   * PluginManager (uninstalling the PluginManager will make the ONCE immutable)
+ *  -   * PluginViewer
+ *  -   * AccessControl
+ *  - The addresses of these plugins should be passed when constructing a ONCE
+ * @author Ketul 'Jay' Patel
+**/ 
+
 contract Once { 
 
+    /**
+     * @notice Constructor function takes in the addresses of default plugins
+     * @param _pluginManager PluginManager address
+     * @param _pluginViewer PluginViewer address
+     * @param _accessControl AccessControl address
+     */
     constructor(address _pluginManager, address _pluginViewer, address _accessControl) payable {        
         OnceStorage._grantRole(OnceStorage.ONCE_UPDATE_ROLE, msg.sender);
         OnceStorage._grantRole(OnceStorage.DEFAULT_ADMIN_ROLE, msg.sender);
-
-        // Every Once by default comes with the following plugins which can be uninstalled or upgraded as needed:
-        // -- PluginManager (uninstalling the PluginManager will make the Once immutable)
-        // -- PluginViewer
-        // -- AccessControl 
 
         // PluginManager
         IPluginManager.UpdateInstruction[] memory pluginManagerInstallation = new IPluginManager.UpdateInstruction[](1);
@@ -47,8 +67,9 @@ contract Once {
         
     }
 
-    // Find plugin for function that is called and execute the
-    // function if a plugin is found and return any value.
+    /**
+     * @dev fallback function finds the appropriate plugin to forward the transaction to and returns result
+     */
     fallback() external payable {
         OnceStorage.Store storage ds;
         bytes32 position = OnceStorage.STORAGE_SLOT;
