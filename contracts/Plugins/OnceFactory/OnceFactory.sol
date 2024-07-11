@@ -170,6 +170,9 @@ contract OnceFactory is IOncePlugin {
         }
     }
 
+    /**
+     * @inheritdoc IOncePlugin
+     */
     function getFunctionSelectors() public pure returns (bytes4[] memory) {
         bytes4[] memory selectors = new bytes4[](7);
         selectors[0] = this.deployOnce.selector;
@@ -182,6 +185,9 @@ contract OnceFactory is IOncePlugin {
         return selectors;
     }
 
+    /**
+     * @inheritdoc IOncePlugin
+     */
     function getSingletonAddress() public view returns (address) {
         return address(this);
     }

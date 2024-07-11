@@ -19,19 +19,37 @@ library OnceStorage {
     using AddressUtils for address;
     using EnumerableSet for EnumerableSet.AddressSet;
     using UintUtils for uint256;
-
+    
+    /**
+     * @notice This event is emited when the admin role changes
+     * @param role the role for which the admin role changed
+     * @param previousAdminRole the previous admin role
+     * @param newAdminRole the new admin role
+     */
     event RoleAdminChanged(
         bytes32 indexed role,
         bytes32 indexed previousAdminRole,
         bytes32 indexed newAdminRole
     );
 
+    /**
+     * @notice This event is emitted when a role is granted
+     * @param role the role that was granted
+     * @param account the address that the role was granted to
+     * @param sender the transaction sender (msg.sender)
+     */
     event RoleGranted(
         bytes32 indexed role,
         address indexed account,
         address indexed sender
     );
 
+    /**
+     * @notice This event is emitted when a role is revoked
+     * @param role the role that was revoked
+     * @param account the address from which the role was revoked
+     * @param sender the transaction sender (msg.sender)
+     */
     event RoleRevoked(
         bytes32 indexed role,
         address indexed account,
@@ -40,9 +58,13 @@ library OnceStorage {
 
     bytes32 constant STORAGE_SLOT = keccak256("layered.contracts.lib.once");
 
+    /**
+     * @dev there are 2 roles defined by default
+     * ONCE_UPDATE_ROLE is used for access control on plugin management
+     * DEFAULT_ADMIN_ROLE provides an internal constant for referring to the default admin role (0x00)
+     */
     bytes32 public constant ONCE_UPDATE_ROLE = keccak256("LAYERED_ONCE_UPDATE_ROLE");
     bytes32 internal constant DEFAULT_ADMIN_ROLE = 0x00;
-
 
     struct PluginAddressAndPosition {
         address pluginAddress;

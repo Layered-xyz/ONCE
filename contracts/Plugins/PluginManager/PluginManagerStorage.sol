@@ -6,12 +6,16 @@ import { OnceStorage } from "../../Base/OnceStorage.sol";
 
 
 error InitializationFunctionReverted(address _initializationContractAddress, bytes _calldata);
-
+/**
+ * @title PluginManagerStorage -- A storage/utility library for the Plugin Manager Once plugin
+ * @author Ketul 'Jay' Patel
+ * @notice This library contains the core functionality used for processing updates via the Plugin Manager "update" function
+ * @dev The logic in this contract takes inspiration from Diamond Proxy Pattern implementations shared by Nick Mudge @mudgen
+ */
 library PluginManagerStorage {
 
     event OnceUpdate(IPluginManager.UpdateInstruction[] _updateInstructions, address _init, bytes _calldata);
 
-    // Internal function version of update
     function update(
         IPluginManager.UpdateInstruction[] memory _updateInstructions,
         address _init,
@@ -38,7 +42,6 @@ library PluginManagerStorage {
         OnceStorage.Store storage ds = OnceStorage.store();        
         require(_pluginAddress != address(0), "PluginManager: Add plugin can't be address(0)");
         uint96 selectorPosition = uint96(ds.pluginFunctionSelectors[_pluginAddress].functionSelectors.length);
-        // add new plugin address if it does not exist
         if (selectorPosition == 0) {
             addPlugin(ds, _pluginAddress);            
         }
@@ -56,7 +59,6 @@ library PluginManagerStorage {
         OnceStorage.Store storage ds = OnceStorage.store(); 
         require(_pluginAddress != address(0), "PluginManager: Add plugin can't be address(0)");
         uint96 selectorPosition = uint96(ds.pluginFunctionSelectors[_pluginAddress].functionSelectors.length);
-        // add new plugin address if it does not exist
         if (selectorPosition == 0) {
             addPlugin(ds, _pluginAddress);
         }
@@ -73,7 +75,6 @@ library PluginManagerStorage {
     function removeFunctions(address _pluginAddress, bytes4[] memory _functionSelectors) internal {
         require(_functionSelectors.length > 0, "PluginManager: No selectors in plugin to update");
         OnceStorage.Store storage ds = OnceStorage.store(); 
-        // if function does not exist then do nothing and return
         require(_pluginAddress == address(0), "PluginManager: Remove plugin address must be address(0)");
         for (uint256 selectorIndex; selectorIndex < _functionSelectors.length; selectorIndex++) {
             bytes4 selector = _functionSelectors[selectorIndex];
@@ -97,24 +98,18 @@ library PluginManagerStorage {
 
     function removeFunction(OnceStorage.Store storage ds, address _pluginAddress, bytes4 _selector) internal {        
         require(_pluginAddress != address(0), "PluginManager: Can't remove function that doesn't exist");
-        // an immutable function is a function defined directly in once
-        require(_pluginAddress != address(this), "PluginManager: Can't remove immutable function");
-        // replace selector with last selector, then delete last selector
+        require(_pluginAddress != address(this), "PluginManager: Can't remove immutable function"); 
         uint256 selectorPosition = ds.selectorToPluginAndPosition[_selector].functionSelectorPosition;
         uint256 lastSelectorPosition = ds.pluginFunctionSelectors[_pluginAddress].functionSelectors.length - 1;
-        // if not the same then replace _selector with lastSelector
         if (selectorPosition != lastSelectorPosition) {
             bytes4 lastSelector = ds.pluginFunctionSelectors[_pluginAddress].functionSelectors[lastSelectorPosition];
             ds.pluginFunctionSelectors[_pluginAddress].functionSelectors[selectorPosition] = lastSelector;
             ds.selectorToPluginAndPosition[lastSelector].functionSelectorPosition = uint96(selectorPosition);
         }
-        // delete the last selector
         ds.pluginFunctionSelectors[_pluginAddress].functionSelectors.pop();
         delete ds.selectorToPluginAndPosition[_selector];
 
-        // if no more selectors for plugin address then delete the plugin address
         if (lastSelectorPosition == 0) {
-            // replace plugin address with last plugin address and delete last plugin address
             uint256 lastPluginAddressPosition = ds.pluginAddresses.length - 1;
             uint256 pluginAddressPosition = ds.pluginFunctionSelectors[_pluginAddress].pluginAddressPosition;
             if (pluginAddressPosition != lastPluginAddressPosition) {

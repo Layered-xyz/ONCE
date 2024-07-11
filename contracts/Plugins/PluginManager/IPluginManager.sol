@@ -1,6 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+/**
+ * @title IPluginManager interface
+ * @author Ketul 'Jay' Patel 
+ * @notice An interface for the PluginManager
+ */
 interface IPluginManager {
     enum UpdateActionType {Add, Replace, Remove}
     // Add=0, Replace=1, Remove=2

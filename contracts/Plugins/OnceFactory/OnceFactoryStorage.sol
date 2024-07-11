@@ -4,19 +4,33 @@ pragma solidity ^0.8.8;
 
 import { IPluginManager } from "../PluginManager/IPluginManager.sol";
 
+/**
+ * @title OnceFactoryStorage -- A storage library for the ONCE factory plugin
+ * @author Ketul 'Jay' Patel
+ * @notice OnceFactoryStorage maintains the associated default plugin addresses used when deploying via the OnceFactory
+ */
 library OnceFactoryStorage {
+    /**
+     * @dev stores the 3 default plugin addresses -- PluginManager, PluginViewer, AccessControl
+     */
     struct Store {
         address pluginManagerAddress;
         address pluginViewerAddress;
         address accessControlAddress;
     }
 
+    /**
+     * @dev the struct used by the OnceFactory when initializing roles during the deployment process
+     */
     struct RoleInitializer {
         bytes32 roleToCreate;
         address[] membersToAdd;
         bytes32 roleAdmin;
     }
 
+    /**
+     * @dev the struct used by the OnceFactory when initializing plugins during the deployment process
+     */
     struct PluginInitializer {
         IPluginManager.UpdateInstruction[] initialUpdateInstructions;
         address pluginInitializer;

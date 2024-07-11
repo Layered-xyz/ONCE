@@ -8,7 +8,7 @@ import {IOncePlugin} from '../../Interfaces/IOncePlugin.sol';
 /**
  * @title SafeProxy - Safe Proxy Plugin compatible with the ONCE system
  * @dev based on the official Safe Proxy contract found in the safe-smart-account repo https://github.com/safe-global/safe-smart-account
- * @author Ketul "Jay" Patel - <jay@layered.xyz>
+ * @author Ketul "Jay" Patel
  */
 contract SafeProxy is IOncePlugin {
     // Singleton always needs to be first declared variable, to ensure that it is at the same location in the contracts to which calls are delegated.
@@ -26,10 +26,16 @@ contract SafeProxy is IOncePlugin {
         functionSelectors = _functionSelectors;
     }
 
+    /**
+     * @inheritdoc IOncePlugin
+     */
     function getFunctionSelectors() public view returns (bytes4[] memory) {
         return functionSelectors;
     }
-
+    
+    /**
+     * @inheritdoc IOncePlugin
+     */
     function getSingletonAddress() public view returns (address) {
         return singleton;
     }

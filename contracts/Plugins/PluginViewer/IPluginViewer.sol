@@ -2,8 +2,6 @@
 pragma solidity ^0.8.0;
 
 interface IPluginViewer {
-    /// These functions are expected to be called frequently
-    /// by tools.
 
     struct Plugin {
         address pluginAddress;

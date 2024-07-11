@@ -6,7 +6,11 @@ import { IPluginViewer } from "./IPluginViewer.sol";
 import { IERC165 } from "../../Base/interfaces/IERC165.sol";
 import { IOncePlugin } from "../../Interfaces/IOncePlugin.sol";
 
-
+/**
+ * @title PluginViewer -- a plugin for examining the functions and plugins installed on the Once
+ * @author Ketul 'Jay' Patel
+ * @notice PluginViewer is a Once plugin installed by default for viewing the installed plugins and their corresponding function selectors
+ */
 contract PluginViewer is IPluginViewer, IERC165, IOncePlugin {
 
     /// @notice Gets all plugins and their selectors.
@@ -30,7 +34,7 @@ contract PluginViewer is IPluginViewer, IERC165, IOncePlugin {
         pluginFunctionSelectors_ = ds.pluginFunctionSelectors[_plugin].functionSelectors;
     }
 
-    /// @notice Get all the plugin addresses used by a diamond.
+    /// @notice Get all the plugin addresses used by a Once.
     /// @return pluginAddresses_
     function pluginAddresses() external override view returns (address[] memory pluginAddresses_) {
         OnceStorage.Store storage ds = OnceStorage.store();
@@ -46,12 +50,13 @@ contract PluginViewer is IPluginViewer, IERC165, IOncePlugin {
         pluginAddress_ = ds.selectorToPluginAndPosition[_functionSelector].pluginAddress;
     }
 
-    // This implements ERC-165.
     function supportsInterface(bytes4 _interfaceId) external override view returns (bool) {
         OnceStorage.Store storage ds = OnceStorage.store();
         return ds.supportedInterfaces[_interfaceId];
     }
-
+    /**
+     * @inheritdoc IOncePlugin
+    */
     function getFunctionSelectors() public pure returns (bytes4[] memory) {
         bytes4[] memory selectors = new bytes4[](4);
         selectors[0] = this.plugins.selector;
@@ -60,7 +65,9 @@ contract PluginViewer is IPluginViewer, IERC165, IOncePlugin {
         selectors[3] = this.pluginAddress.selector;
         return selectors;
     }
-    
+    /**
+     * @inheritdoc IOncePlugin
+    */
     function getSingletonAddress() public view returns (address) {
         return address(this);
     }

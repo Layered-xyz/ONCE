@@ -7,7 +7,12 @@ import { IOncePlugin } from "../../Interfaces/IOncePlugin.sol";
 import { PluginManagerStorage } from "./PluginManagerStorage.sol";
 import { OnceStorage } from "../../Base/OnceStorage.sol";
 
-
+/**
+ * @title PluginManager -- the Once plugin for managing other plugins
+ * @author Ketul 'Jay' Patel
+ * @notice PluginManager is a Once plugin that is used by default for managing other plugins
+ * @dev Uninstalling the PluginManager plugin will make a Once immutable
+ */
 contract PluginManager is IPluginManager, IOncePlugin {
 
     bytes32 internal constant ONCE_UPDATE_ROLE = keccak256("LAYERED_ONCE_UPDATE_ROLE");
@@ -27,11 +32,17 @@ contract PluginManager is IPluginManager, IOncePlugin {
         PluginManagerStorage.update(updateInstructions, init, initCalldata);
     }
 
+    /**
+     * @inheritdoc IOncePlugin
+     */
     function getFunctionSelectors() public pure returns (bytes4[] memory) {
         bytes4[] memory selectors = new bytes4[](1);
         selectors[0] = this.update.selector;
         return selectors;
     }
+    /**
+     * @inheritdoc IOncePlugin
+     */
     function getSingletonAddress() public view returns (address) {
         return address(this);
     }
