@@ -32,12 +32,22 @@ contract PluginManager is IPluginManager, IOncePlugin {
         PluginManagerStorage.update(updateInstructions, init, initCalldata);
     }
 
+    /// @notice update the default fallback address used when no selector matches the calldata
+    /// @param newDefault the default plugin address
+    function updateDefaultFallback(
+        address newDefault
+    ) external override {
+        OnceStorage._checkRole(ONCE_UPDATE_ROLE);
+        PluginManagerStorage.updateDefaultFallback(newDefault);
+    }
+
     /**
      * @inheritdoc IOncePlugin
      */
     function getFunctionSelectors() public pure returns (bytes4[] memory) {
-        bytes4[] memory selectors = new bytes4[](1);
+        bytes4[] memory selectors = new bytes4[](2);
         selectors[0] = this.update.selector;
+        selectors[1] = this.updateDefaultFallback.selector;
         return selectors;
     }
     /**

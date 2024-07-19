@@ -19,17 +19,18 @@ import 'solidity-coverage';
 const dotenvConfigPath: string = process.env.DOTENV_CONFIG_PATH || './.env';
 dotenvConfig({path: resolve(__dirname, dotenvConfigPath)});
 
-if (!process.env.INFURA_API_KEY) {
-  throw new Error('INFURA_API_KEY in .env not set');
+if (!process.env.ALCHEMY_API_KEY) {
+  throw new Error('ALCHEMY_API_KEY in .env not set');
 }
 
 const apiUrls: NetworkNameMapping = {
-  arbitrumOne: 'https://arbitrumOne.infura.io/v3/',
-  arbitrumGoerli: 'https://arbitrumGoerli.infura.io/v3/',
-  mainnet: 'https://mainnet.infura.io/v3/',
-  goerli: 'https://goerli.infura.io/v3/',
-  polygon: 'https://polygon-mainnet.infura.io/v3/',
-  polygonMumbai: 'https://polygon-mumbai.infura.io/v3/',
+  mainnet: 'https://eth-mainnet.g.alchemy.com/v2/',
+  polygon: 'https://polygon-mainnet.g.alchemy.com/v2/',
+  optimism: 'https://opt-mainnet.g.alchemy.com/v2/',
+  base: 'https://base-mainnet.g.alchemy.com/v2/',
+  arbitrum: 'https://arb-mainnet.g.alchemy.com/v2/',
+  blast: 'https://blast-mainnet.g.alchemy.com/v2/',
+  zksync: 'https://zksync-mainnet.g.alchemy.com/v2/',
 };
 
 const networks: {[index: string]: NetworkUserConfig} = {
@@ -42,24 +43,37 @@ const networks: {[index: string]: NetworkUserConfig} = {
             ? process.env.HARDHAT_FORK_NETWORK
             : 'mainnet'
         ]
-      }${process.env.INFURA_API_KEY}`,
+      }${process.env.ALCHEMY_API_KEY}`,
+      blockNumber: 59246100 // Before initial ONCE contract deployments on polygon to avoid conflicts
     },
   },
   mainnet: {
     chainId: 1,
-    url: `${apiUrls.mainnet}${process.env.INFURA_API_KEY}`,
-  },
-  goerli: {
-    chainId: 5,
-    url: `${apiUrls.goerli}${process.env.INFURA_API_KEY}`,
+    url: `${apiUrls.mainnet}${process.env.ALCHEMY_API_KEY}`,
   },
   polygon: {
     chainId: 137,
-    url: `${apiUrls.polygon}${process.env.INFURA_API_KEY}`,
+    url: `${apiUrls.polygon}${process.env.ALCHEMY_API_KEY}`,
   },
-  polygonMumbai: {
-    chainId: 80001,
-    url: `${apiUrls.polygonMumbai}${process.env.INFURA_API_KEY}`,
+  optimism: {
+    chainId: 10,
+    url: `${apiUrls.optimism}${process.env.ALCHEMY_API_KEY}`,
+  },
+  arbitrum: {
+    chainId: 42161,
+    url: `${apiUrls.arbitrum}${process.env.ALCHEMY_API_KEY}`,
+  },
+  base: {
+    chainId: 8453,
+    url: `${apiUrls.base}${process.env.ALCHEMY_API_KEY}`,
+  },
+  blast: {
+    chainId: 81457,
+    url: `${apiUrls.blast}${process.env.ALCHEMY_API_KEY}`,
+  },
+  zksync: {
+    chainId: 324,
+    url: `${apiUrls.zksync}${process.env.ALCHEMY_API_KEY}`,
   },
 };
 

@@ -26,4 +26,9 @@ interface IPluginViewer {
     /// @param _functionSelector The function selector.
     /// @return pluginAddress_ The plugin address.
     function pluginAddress(bytes4 _functionSelector) external view returns (address pluginAddress_);
+
+    /// @notice Gets the default plugin
+    /// @dev default plugin will be used when no function selector matches a plugin address.
+    /// @return defaultPluginAddress the address for default fallback
+    function getDefaultPlugin() external view returns (address defaultPluginAddress);
 }

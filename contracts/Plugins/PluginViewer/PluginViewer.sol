@@ -50,6 +50,14 @@ contract PluginViewer is IPluginViewer, IERC165, IOncePlugin {
         pluginAddress_ = ds.selectorToPluginAndPosition[_functionSelector].pluginAddress;
     }
 
+    /// @notice Gets the default plugin
+    /// @dev default plugin will be used when no function selector matches a plugin address.
+    /// @return defaultPluginAddress the address for default fallback
+    function getDefaultPlugin() external override view returns (address defaultPluginAddress) {
+        OnceStorage.Store storage ds = OnceStorage.store();
+        defaultPluginAddress = ds.defaultFallback;
+    }
+
     function supportsInterface(bytes4 _interfaceId) external override view returns (bool) {
         OnceStorage.Store storage ds = OnceStorage.store();
         return ds.supportedInterfaces[_interfaceId];
@@ -58,11 +66,12 @@ contract PluginViewer is IPluginViewer, IERC165, IOncePlugin {
      * @inheritdoc IOncePlugin
     */
     function getFunctionSelectors() public pure returns (bytes4[] memory) {
-        bytes4[] memory selectors = new bytes4[](4);
+        bytes4[] memory selectors = new bytes4[](5);
         selectors[0] = this.plugins.selector;
         selectors[1] = this.pluginFunctionSelectors.selector;
         selectors[2] = this.pluginAddresses.selector;
         selectors[3] = this.pluginAddress.selector;
+        selectors[4] = this.getDefaultPlugin.selector;
         return selectors;
     }
     /**

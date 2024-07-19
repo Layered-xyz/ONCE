@@ -21,7 +21,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
 
   const SafeProxy = await deploy("SafeProxy", {
     from: deployer,
-    args: ["0x29fcB43b46531BcA003ddC8FCB67FFE91900C762", selectors],
+    args: ["0x29fcB43b46531BcA003ddC8FCB67FFE91900C762", selectors], // 1.4.1
     log: true,
     deterministicDeployment: utils.id("layered.once.443e20e5")
   });

@@ -10,6 +10,9 @@ import { IPluginManager } from "../PluginManager/IPluginManager.sol";
  * @notice OnceFactoryStorage maintains the associated default plugin addresses used when deploying via the OnceFactory
  */
 library OnceFactoryStorage {
+
+    bytes32 internal constant ONCE_FACTORY_UPDATE_ROLE = keccak256("LAYERED_ONCE_FACTORY_UPDATE_ROLE");
+
     /**
      * @dev stores the 3 default plugin addresses -- PluginManager, PluginViewer, AccessControl
      */

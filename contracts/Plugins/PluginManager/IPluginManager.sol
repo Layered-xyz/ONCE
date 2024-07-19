@@ -27,4 +27,8 @@ interface IPluginManager {
         address _init,
         bytes calldata _calldata
     ) external;
+
+    function updateDefaultFallback(
+        address newDefault
+    ) external;
 }

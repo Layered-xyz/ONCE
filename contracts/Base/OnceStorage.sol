@@ -94,6 +94,8 @@ library OnceStorage {
         mapping(bytes4 => bool) supportedInterfaces;
         // Access control roles
         mapping(bytes32 => RoleData) roles;
+        // A default fallback address, should only be set if needed
+        address defaultFallback;
     }
 
     function store() internal pure returns (Store storage s) {

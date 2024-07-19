@@ -19,6 +19,7 @@ contract SafeProxy is IOncePlugin {
     /**
      * @notice Constructor function sets address of singleton contract.
      * @param _singleton Singleton address.
+     * @param _functionSelectors The function selectors from the singleton that should be installed on plugin installation
      */
     constructor(address _singleton, bytes4[] memory _functionSelectors) {
         require(_singleton != address(0), "Invalid singleton address provided");
@@ -32,7 +33,7 @@ contract SafeProxy is IOncePlugin {
     function getFunctionSelectors() public view returns (bytes4[] memory) {
         return functionSelectors;
     }
-    
+
     /**
      * @inheritdoc IOncePlugin
      */

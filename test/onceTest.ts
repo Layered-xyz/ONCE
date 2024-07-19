@@ -1,6 +1,6 @@
 import { ethers, deployments, getNamedAccounts } from "hardhat";
 
-import { ContractReceipt, utils } from "ethers";
+import { ContractReceipt, providers, utils } from "ethers";
 import { assert, expect } from "chai";
 
 import { Once, OnceFactory, PluginManager, IPluginManager, PluginViewer, IPluginViewer, OnceInit, OnceFactoryInit, AccessControl, Once__factory, SafeProxy, SafeProxyInit, SafeL2, Safe, StorageSetter, Reverter } from "../typechain";
@@ -28,51 +28,6 @@ enum UpdateActionType {
     add, replace, remove
 }
 
-const createOnceFactory = deployments.createFixture(
-    async ({deployments, getNamedAccounts, ethers}, options) => {
-        await deployments.fixture();
-
-        const pluginViewer = await deployments.get("PluginViewer");
-        const pluginManager = await deployments.get("PluginManager");
-        const accessControl = await deployments.get("AccessControl");
-        const onceFactory = await deployments.get("OnceFactory");
-        const onceFactoryInit = await deployments.get("OnceFactoryInit");
-        const onceInit = await deployments.get("OnceInit");
-
-        const once = await ethers.getContractFactory("Once");
-
-        const pluginViewerContract = await ethers.getContractAt("PluginViewer", pluginViewer.address) as PluginViewer;
-        const onceFactoryContract = await ethers.getContractAt("OnceFactory", onceFactory.address) as OnceFactory;
-        const onceInitContract = await ethers.getContractAt("OnceInit", onceInit.address) as OnceInit;
-        const onceFactoryInitContract = await ethers.getContractAt("OnceFactoryInit", onceFactoryInit.address) as OnceFactoryInit;
-
-
-        const deployedOnceFactory = await once.deploy(pluginManager.address, pluginViewer.address, accessControl.address);
-        await deployedOnceFactory.deployed();
-
-        const deployedOnceFactoryPluginManager = await ethers.getContractAt("PluginManager", deployedOnceFactory.address) as PluginManager;
-
-        const onceFactoryFunctionSelectors = await onceFactoryContract.getFunctionSelectors();
-        const onceFactoryCallData = onceFactoryInitContract.interface.encodeFunctionData("init", [pluginManager.address, pluginViewer.address, accessControl.address]);
-
-        let onceFactoryTx = await deployedOnceFactoryPluginManager.update(
-            [{
-                pluginAddress: onceFactory.address,
-                action: UpdateActionType.add,
-                functionSelectors: onceFactoryFunctionSelectors
-            }], 
-            onceFactoryInit.address, 
-            onceFactoryCallData
-        );
-
-        let onceFactoryTxReceipt = await onceFactoryTx.wait();
-
-        return {
-            deployedOnceFactoryAddress: deployedOnceFactory.address,
-        };
-    }
-);
-
 // Deploys a 1:1 Safe on Once for testing
 const createSafe = deployments.createFixture(
     async ({deployments, getNamedAccounts, ethers}, options) => {
@@ -94,7 +49,7 @@ const createSafe = deployments.createFixture(
         const safeProxyContract = await ethers.getContractAt("SafeProxy", safeProxy.address) as SafeProxy;
         const safeProxyInitContract = await ethers.getContractAt("SafeProxyInit", safeProxyInit.address) as SafeProxyInit;
 
-        const safe = await once.deploy(pluginManager.address, pluginViewer.address, accessControl.address);
+        const safe = await once.deploy(ethers.constants.AddressZero, pluginManager.address, pluginViewer.address, accessControl.address);
         await safe.deployed();
 
         const safePluginManager = await ethers.getContractAt("PluginManager", safe.address) as PluginManager;
@@ -113,6 +68,7 @@ const createSafe = deployments.createFixture(
             }],
             safeProxyInit.address,
             safeProxyInitContract.interface.encodeFunctionData('init', [
+                safeProxySingletonAddress,
                 [deployer],
                 1,
                 ethers.constants.AddressZero,
@@ -161,7 +117,9 @@ describe.only("Once, OnceFactory, and standard plugins", async function () {
     let safeProxyInit: SafeProxyInit;
 
     before(async () => {
-        let { deployedOnceFactoryAddress } = await createOnceFactory();
+        await deployments.fixture();
+        const deployedOnceFactoryInstance = await deployments.get("OnceFactoryInstance");
+        let deployedOnceFactoryAddress = deployedOnceFactoryInstance.address
         deployedOnceFactory = await ethers.getContractAt("OnceFactory", deployedOnceFactoryAddress) as OnceFactory;
         deployedOnceFactoryPluginViewer = await ethers.getContractAt("PluginViewer", deployedOnceFactoryAddress) as PluginViewer;
         deployedOnceFactoryPluginManager = await ethers.getContractAt("PluginManager", deployedOnceFactoryAddress) as PluginManager;
@@ -214,7 +172,12 @@ describe.only("Once, OnceFactory, and standard plugins", async function () {
         })
         it("allows admin to update default plugin addresses", async function() {
             // TODO
-            // NOT IMPLEMENTED IN CONTRACT
+        })
+        it("allows for updating the default plugin", async function() {
+            // TODO
+        })
+        it("defers to the default plugin when set", async function() {
+            // TODO
         })
     
         describe("Standard Once deployment via OnceFactory", async function() {
@@ -310,7 +273,7 @@ describe.only("Once, OnceFactory, and standard plugins", async function () {
             })
         })
     })
-    describe.only("SafeProxy", async function() {
+    describe("SafeProxy", async function() {
         let signers: SignerWithAddress[];
         let safeProxySelectors: string[];
         let safeProxySingletonAddress: string;
@@ -345,6 +308,7 @@ describe.only("Once, OnceFactory, and standard plugins", async function () {
                     }],
                     pluginInitializer: safeProxyInit.address,
                     pluginInitializerCallData: safeProxyInit.interface.encodeFunctionData('init', [
+                        safeProxySingletonAddress,
                         [deployer],
                         1,
                         ethers.constants.AddressZero,
@@ -726,7 +690,19 @@ describe.only("Once, OnceFactory, and standard plugins", async function () {
             // });
         });
 
-        describe.only("Safe self-management access controls", async function() {
+        describe("Safe wallet & SDK compatibility tests", async function() {
+            it("should store the master copy address at memory slot 0", async () => {
+                const {safe, safePluginManager, safePluginViewer, pluginManagerContract, pluginViewerContract} = await createSafe();
+                const firstSlot = await ethers.provider.getStorageAt(safe.address, 0x00);
+                expect(firstSlot.substring(26), "First Slot should have master copy address").to.equal("29fcB43b46531BcA003ddC8FCB67FFE91900C762".toLowerCase())
+            })
+
+            it("should emit the proxy creation event", async () => {
+
+            })
+        })
+
+        describe("Safe self-management access controls", async function() {
             it("should appropriately call update on itself via Safe Transaction", async () => {
 
                 const {safe, safePluginManager, safePluginViewer, pluginManagerContract, pluginViewerContract} = await createSafe();

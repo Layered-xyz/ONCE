@@ -19,4 +19,3 @@ deployments
 .DS_Store
 .pnp.*
 coverage.json
-deployed_contracts.json

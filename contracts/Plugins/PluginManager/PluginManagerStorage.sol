@@ -15,6 +15,7 @@ error InitializationFunctionReverted(address _initializationContractAddress, byt
 library PluginManagerStorage {
 
     event OnceUpdate(IPluginManager.UpdateInstruction[] _updateInstructions, address _init, bytes _calldata);
+    event OnceUpdateDefault(address newDefaultFallback, address oldDefaultFallback);
 
     function update(
         IPluginManager.UpdateInstruction[] memory _updateInstructions,
@@ -35,6 +36,15 @@ library PluginManagerStorage {
         }
         emit OnceUpdate(_updateInstructions, _init, _calldata);
         initializeUpdate(_init, _calldata);
+    }
+
+    function updateDefaultFallback(
+        address newDefault
+    ) internal {
+        OnceStorage.Store storage ds = OnceStorage.store();
+        address oldDefault = ds.defaultFallback;
+        ds.defaultFallback = newDefault;
+        emit OnceUpdateDefault(newDefault, oldDefault);
     }
 
     function addFunctions(address _pluginAddress, bytes4[] memory _functionSelectors) internal {

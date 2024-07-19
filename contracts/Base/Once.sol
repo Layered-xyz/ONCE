@@ -29,13 +29,14 @@ contract Once {
 
     /**
      * @notice Constructor function takes in the addresses of default plugins
+     * @param sender The sender, this address gets the initial access controls and should be specified if using a deterministic deployment proxy. If address(0) is provided then the initial access controls are given to msg.sender
      * @param _pluginManager PluginManager address
      * @param _pluginViewer PluginViewer address
      * @param _accessControl AccessControl address
      */
-    constructor(address _pluginManager, address _pluginViewer, address _accessControl) payable {        
-        OnceStorage._grantRole(OnceStorage.ONCE_UPDATE_ROLE, msg.sender);
-        OnceStorage._grantRole(OnceStorage.DEFAULT_ADMIN_ROLE, msg.sender);
+    constructor(address sender, address _pluginManager, address _pluginViewer, address _accessControl) payable {        
+        OnceStorage._grantRole(OnceStorage.ONCE_UPDATE_ROLE, sender != address(0) ? sender : msg.sender);
+        OnceStorage._grantRole(OnceStorage.DEFAULT_ADMIN_ROLE, sender != address(0) ? sender : msg.sender);
 
         // PluginManager
         IPluginManager.UpdateInstruction[] memory pluginManagerInstallation = new IPluginManager.UpdateInstruction[](1);
@@ -79,7 +80,10 @@ contract Once {
         }
         // get plugin from function selector
         address plugin = ds.selectorToPluginAndPosition[msg.sig].pluginAddress;
-        require(plugin != address(0), "Once: Function does not exist");
+        if(plugin == address(0)) {
+            plugin = ds.defaultFallback;
+        }
+        require(plugin != address(0), "Once: plugin does not exist, and default fallback is not set");
         // Execute external function from plugin using delegatecall and return any value.
         assembly {
             // copy function selector and any arguments
