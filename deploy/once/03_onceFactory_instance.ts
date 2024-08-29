@@ -32,7 +32,7 @@ const func: DeployFunction = async function (hre: HardhatRuntimeEnvironment) {
     libraries: {
       OnceStorage: deployedContracts[network.name]["OnceStorage"]
     },
-    deterministicDeployment: utils.id("layered.once.443e20e5")
+    deterministicDeployment: utils.id("layered.once.factory.v0.1.443e20e5")
   })
 
   await deployments.save("OnceFactoryInstance", OnceFactory)

@@ -9,6 +9,7 @@ pragma solidity ^0.8.18;
 library UintUtils {
     error UintUtils__InsufficientPadding();
     error UintUtils__InvalidBase();
+    
 
     bytes16 private constant HEX_SYMBOLS = '0123456789abcdef';
 
@@ -19,6 +20,74 @@ library UintUtils {
     function sub(uint256 a, int256 b) internal pure returns (uint256) {
         return b < 0 ? add(a, -b) : a - uint256(b);
     }
+
+      function average(uint256 a, uint256 b) internal pure returns (uint256) {
+        
+        return (a & b) + (a ^ b) / 2;
+    }
+
+    function sqrt(uint256 a) internal pure returns (uint256) {
+        if (a == 0) {
+            return 0;
+        }
+
+        uint256 result = 1 << (log2(a) >> 1);
+
+       
+        unchecked {
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            result = (result + a / result) >> 1;
+            return min(result, a / result);
+        }
+    }
+     function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a < b ? a : b;
+    }
+
+     function log2(uint256 value) internal pure returns (uint256) {
+        uint256 result = 0;
+        unchecked {
+            if (value >> 128 > 0) {
+                value >>= 128;
+                result += 128;
+            }
+            if (value >> 64 > 0) {
+                value >>= 64;
+                result += 64;
+            }
+            if (value >> 32 > 0) {
+                value >>= 32;
+                result += 32;
+            }
+            if (value >> 16 > 0) {
+                value >>= 16;
+                result += 16;
+            }
+            if (value >> 8 > 0) {
+                value >>= 8;
+                result += 8;
+            }
+            if (value >> 4 > 0) {
+                value >>= 4;
+                result += 4;
+            }
+            if (value >> 2 > 0) {
+                value >>= 2;
+                result += 2;
+            }
+            if (value >> 1 > 0) {
+                result += 1;
+            }
+        }
+        return result;
+    }
+
+   
 
     /**
      * @notice output the string representation of a number in a given radix
@@ -278,5 +347,85 @@ library UintUtils {
         if (value != 0) revert UintUtils__InsufficientPadding();
 
         output = string(buffer);
+    }
+
+ /**
+     * @notice Computes the base-10 logarithm of a uint256 value.
+     * @param value The uint256 value.
+     * @return The base-10 logarithm of the input value.
+     */
+    function log10(uint256 value) internal pure returns (uint256) {
+        uint256 result = 0;
+        unchecked {
+            if (value >= 10 ** 64) {
+                value /= 10 ** 64;
+                result += 64;
+            }
+            if (value >= 10 ** 32) {
+                value /= 10 ** 32;
+                result += 32;
+            }
+            if (value >= 10 ** 16) {
+                value /= 10 ** 16;
+                result += 16;
+            }
+            if (value >= 10 ** 8) {
+                value /= 10 ** 8;
+                result += 8;
+            }
+            if (value >= 10 ** 4) {
+                value /= 10 ** 4;
+                result += 4;
+            }
+            if (value >= 10 ** 2) {
+                value /= 10 ** 2;
+                result += 2;
+            }
+            if (value >= 10 ** 1) {
+                result += 1;
+            }
+        }
+        return result;
+    }
+
+   /**
+     * @notice Computes the base-256 logarithm of a uint256 value.
+     * @param value The uint256 value.
+     * @return The base-256 logarithm of the input value.
+     */
+    function log256(uint256 value) internal pure returns (uint256) {
+        uint256 result = 0;
+        unchecked {
+            if (value >> 128 > 0) {
+                value >>= 128;
+                result += 16;
+            }
+            if (value >> 64 > 0) {
+                value >>= 64;
+                result += 8;
+            }
+            if (value >> 32 > 0) {
+                value >>= 32;
+                result += 4;
+            }
+            if (value >> 16 > 0) {
+                value >>= 16;
+                result += 2;
+            }
+            if (value >> 8 > 0) {
+                result += 1;
+            }
+        }
+        return result;
+    }
+     /**
+     * @notice Computes the absolute value of an int256 value.
+     * @param n The int256 value.
+     * @return The absolute value of the input value as a uint256.
+     */
+     function abs(int256 n) internal pure returns (uint256) {
+        unchecked {
+            return uint256(n >= 0 ? n : -n);
+        }
     }
 }

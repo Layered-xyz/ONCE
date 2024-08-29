@@ -2,8 +2,8 @@
 pragma solidity ^0.8.0;
 
 import { OnceStorage } from "./OnceStorage.sol";
-import { PluginManagerStorage } from "../Plugins/PluginManager/PluginManagerStorage.sol";
-import { IPluginManager } from "../Plugins/PluginManager/IPluginManager.sol";
+import { PluginManagerStorage } from "../Plugins/Base/PluginManager/PluginManagerStorage.sol";
+import { IPluginManager } from "../Plugins/Base/PluginManager/IPluginManager.sol";
 import { IOncePlugin } from "../Interfaces/IOncePlugin.sol";
 
 /**

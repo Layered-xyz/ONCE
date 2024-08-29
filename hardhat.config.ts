@@ -28,6 +28,7 @@ const apiUrls: NetworkNameMapping = {
   polygon: 'https://polygon-mainnet.g.alchemy.com/v2/',
   optimism: 'https://opt-mainnet.g.alchemy.com/v2/',
   base: 'https://base-mainnet.g.alchemy.com/v2/',
+  baseSepolia: 'https://base-sepolia.g.alchemy.com/v2/',
   arbitrum: 'https://arb-mainnet.g.alchemy.com/v2/',
   blast: 'https://blast-mainnet.g.alchemy.com/v2/',
   zksync: 'https://zksync-mainnet.g.alchemy.com/v2/',
@@ -44,7 +45,7 @@ const networks: {[index: string]: NetworkUserConfig} = {
             : 'mainnet'
         ]
       }${process.env.ALCHEMY_API_KEY}`,
-      blockNumber: 59246100 // Before initial ONCE contract deployments on polygon to avoid conflicts
+      blockNumber: 59000000 // Before initial ONCE contract deployments on polygon to avoid conflicts
     },
   },
   mainnet: {
@@ -66,6 +67,10 @@ const networks: {[index: string]: NetworkUserConfig} = {
   base: {
     chainId: 8453,
     url: `${apiUrls.base}${process.env.ALCHEMY_API_KEY}`,
+  },
+  baseSepolia: {
+    chainId: 84532,
+    url: `${apiUrls.baseSepolia}${process.env.ALCHEMY_API_KEY}`,
   },
   blast: {
     chainId: 81457,

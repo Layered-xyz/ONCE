@@ -3,7 +3,7 @@ import { ethers, deployments, getNamedAccounts } from "hardhat";
 import { ContractReceipt, providers, utils } from "ethers";
 import { assert, expect } from "chai";
 
-import { Once, OnceFactory, PluginManager, IPluginManager, PluginViewer, IPluginViewer, OnceInit, OnceFactoryInit, AccessControl, Once__factory, SafeProxy, SafeProxyInit, SafeL2, Safe, StorageSetter, Reverter } from "../typechain";
+import { Once, OnceFactory, PluginManager, IPluginManager, PluginViewer, IPluginViewer, OnceInit, OnceFactoryInit, AccessControl, Once__factory, SafeProxy, SafeProxyInit, SafeL2, Safe, StorageSetter, Reverter, CallbackExample__factory, Metadata } from "../typechain";
 import { AbiCoder, EventFragment } from "@ethersproject/abi";
 import { keccak256 } from "ethers/lib/utils";
 import singletonInterface from "../utils/safe";
@@ -31,7 +31,7 @@ enum UpdateActionType {
 // Deploys a 1:1 Safe on Once for testing
 const createSafe = deployments.createFixture(
     async ({deployments, getNamedAccounts, ethers}, options) => {
-        await deployments.fixture();
+        await deployments.fixture(["Once", "OnceFactory", "OnceFactoryInstance", "Safe"]);
         const {deployer} = await getNamedAccounts();
         const signers = await ethers.getSigners();
 
@@ -107,7 +107,7 @@ const createSafe = deployments.createFixture(
       
 )
 
-describe.only("Once, OnceFactory, and standard plugins", async function () {
+describe("Once, OnceFactory, and standard plugins", async function () {
 
     let deployedOnceFactory: OnceFactory;
     let deployedOnceFactoryPluginViewer: PluginViewer;
@@ -117,7 +117,7 @@ describe.only("Once, OnceFactory, and standard plugins", async function () {
     let safeProxyInit: SafeProxyInit;
 
     before(async () => {
-        await deployments.fixture();
+        await deployments.fixture(["Once", "OnceFactory", "OnceFactoryInstance", "Safe", "Metadata"]);
         const deployedOnceFactoryInstance = await deployments.get("OnceFactoryInstance");
         let deployedOnceFactoryAddress = deployedOnceFactoryInstance.address
         deployedOnceFactory = await ethers.getContractAt("OnceFactory", deployedOnceFactoryAddress) as OnceFactory;
@@ -130,7 +130,7 @@ describe.only("Once, OnceFactory, and standard plugins", async function () {
         safeProxyInit = await ethers.getContractAt("SafeProxyInit", safeProxyInitAddress.address) as SafeProxyInit;
     })
 
-    describe("OnceFactory", async function () {
+    describe.only("OnceFactory", async function () {
         it("Contains installed plugins and corresponding selectors", async () => {
             const allPlugins: IPluginViewer.PluginStruct[] = await deployedOnceFactoryPluginViewer.plugins();
     
@@ -251,7 +251,49 @@ describe.only("Once, OnceFactory, and standard plugins", async function () {
             })
         
             it("Successfully executes a callback after deploying", async () => {
-                // TODO
+                const {deployer} = await getNamedAccounts();
+                const callbackFactory = await ethers.getContractFactory('CallbackExample');
+                const callback = await callbackFactory.deploy();
+                const newOnceTx = await deployedOnceFactory.deployOnce(
+                    utils.id("layered.salt.callback.443e20e5"),
+                    [{  
+                        roleToCreate: utils.id("LAYERED_ONCE_UPDATE_ROLE"),
+                        membersToAdd: [deployer],
+                        roleAdmin: ethers.constants.HashZero
+                    },
+                    {  
+                        roleToCreate: ethers.constants.HashZero,
+                        membersToAdd: [deployer],
+                        roleAdmin: ethers.constants.HashZero
+                    }],
+                    {
+                        initialUpdateInstructions: [],
+                        pluginInitializer: ethers.constants.AddressZero,
+                        pluginInitializerCallData: ethers.constants.AddressZero
+                    },
+                    callback.address
+                )
+        
+                const newOnceReceipt = await newOnceTx.wait();
+                expect(newOnceReceipt.status, "New Once deployment should be successful").to.equal(1);
+                
+                const onceDeploymentEvent = newOnceReceipt.events?.find((event) => event.event === 'onceDeployment');
+                expect(onceDeploymentEvent, "Once Factory should emit an event with the new once address").to.not.be.undefined;
+        
+                const newOnceAddress = onceDeploymentEvent?.args?.once
+                expect(newOnceAddress, "Once address should not be undefined").to.not.be.undefined;
+        
+                const newOnceAccessControl = await ethers.getContractAt("AccessControl", newOnceAddress) as AccessControl;
+                const newOnceMetadata = await ethers.getContractAt('Metadata', newOnceAddress) as Metadata;
+        
+                expect(await newOnceAccessControl.hasRole(ethers.utils.id('LAYERED_ONCE_UPDATE_ROLE'), deployer), "Deployer should have LAYERED_ONCE_UPDATE_ROLE").to.be.true;
+                expect(await newOnceAccessControl.hasRole(ethers.utils.id('LAYERED_ONCE_UPDATE_ROLE'), deployedOnceFactory.address), "Once Factory should no longer have LAYERED_ONCE_UPDATE_ROLE").to.be.false;
+                expect(await newOnceAccessControl.hasRole(ethers.constants.HashZero, deployer), "Deployer should be admin").to.be.true;
+                expect(await newOnceAccessControl.hasRole(ethers.constants.HashZero, deployedOnceFactory.address), "Once Factory should no longer be admin").to.be.false;
+                expect(await newOnceAccessControl.hasRole(ethers.utils.id('THE_CHOSEN_ONE'), ethers.constants.AddressZero), "Address Zero should be the chosen one").to.be.true;
+                expect(await newOnceAccessControl.hasRole(ethers.constants.HashZero, callback.address), "Callback should no longer be admin").to.be.false; 
+                expect(await newOnceAccessControl.hasRole(ethers.utils.id('LAYERED_ONCE_UPDATE_ROLE'), callback.address), "Once Factory should no longer have LAYERED_ONCE_UPDATE_ROLE").to.be.false;
+                expect(await newOnceMetadata.entityURI()).to.equal('ipfs://SomeExampleHash');
             })
         })
 

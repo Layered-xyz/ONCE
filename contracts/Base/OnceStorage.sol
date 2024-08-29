@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 import { EnumerableSet } from '../Utils/EnumerableSet.sol';
 import { AddressUtils } from '../Utils/AddressUtils.sol';
 import { UintUtils } from '../Utils/UintUtils.sol';
-import { IPluginManager } from '../Plugins/PluginManager/IPluginManager.sol';
+import { IPluginManager } from '../Plugins/Base/PluginManager/IPluginManager.sol';
 
 
 error InitializationFunctionReverted(address _initializationContractAddress, bytes _calldata);
