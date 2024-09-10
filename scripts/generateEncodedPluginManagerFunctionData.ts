@@ -18,8 +18,7 @@ enum UpdateActionType {
     add, replace, remove
 }
 
-const onceAddress = "0x6BA83ff46de9b7F5edD6140c97373201A187d9De" // Update with the address you'd like to be granted admin access for the ONCE (this can be thought of as the "Owner")
-
+const onceAddress = "0x6BA83ff46de9b7F5edD6140c97373201A187d9De" // Your ONCE address here
 async function generateEncodedDeployOnceFunctionData() {
     console.log("Generating encoded function data for updating a ONCE");
 
@@ -58,7 +57,7 @@ async function generateEncodedDeployOnceFunctionData() {
         erc721AutoIncrementMintInit.interface.encodeFunctionData('init', [
             hre.ethers.utils.parseEther("0"),
             BigInt(0),
-            "ipfs://QmRNEzHdioi6J9Fjdgn8ANFWmjrDK75hCZGpKGsWCPHBb4"
+            "ipfs://your-token-metadata"
         ])
     ])
     
