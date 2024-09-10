@@ -1,6 +1,6 @@
 {
   "name": "layered-once",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "ONCE -- The base layer for On-Chain Entities",
   "main": "index.js",
   "scripts": {
