@@ -18,7 +18,7 @@ enum UpdateActionType {
     add, replace, remove
 }
 
-const initialAdmin = "0x37b7c709D4f5a6cB1B5B595f45Ed20D177666847" // Update with the address you'd like to be granted admin access for the ONCE (this can be thought of as the "Owner")
+const initialAdmin = "0xB2832278D2E16374b7fA0158454139bD1B9B51eC" // Update with the address you'd like to be granted admin access for the ONCE (this can be thought of as the "Owner")
 
 async function generateEncodedDeployOnceFunctionData() {
     console.log("Generating encoded function data for deploying a new ONCE via ONCE factory");
@@ -53,7 +53,7 @@ async function generateEncodedDeployOnceFunctionData() {
     const testingSalt = Date.now();
 
     const encodedDeployOnceFunctionData = await OnceFactoryInstance.interface.encodeFunctionData('deployOnce', [
-        hre.ethers.utils.id(`layered.test.443e20e5${testingSalt}`), // Replace with your own salt, WAGMI!
+        hre.ethers.utils.id(`layered.oncetoken2049.443e20e5`), // Replace with your own salt, WAGMI!
         [{  
             roleToCreate: hre.ethers.utils.id("LAYERED_ONCE_UPDATE_ROLE"), 
             membersToAdd: [initialAdmin], // Adds the update role to the initialAdmin
@@ -72,8 +72,8 @@ async function generateEncodedDeployOnceFunctionData() {
             }],
             pluginInitializer: erc721Init.address,
             pluginInitializerCallData: erc721Init.interface.encodeFunctionData('init', [
-                "Example",
-                "EXT",
+                "ONCE Token2049",
+                "OEST",
                 ""
             ])
         },
@@ -84,7 +84,7 @@ async function generateEncodedDeployOnceFunctionData() {
     console.log(encodedDeployOnceFunctionData);
 
     const newOnceAddress = await OnceFactoryInstance.getOnceAddress(OnceFactoryInstanceAddress,
-        hre.ethers.utils.id(`layered.test.443e20e5${testingSalt}`), // Replace with your own salt, WAGMI!
+        hre.ethers.utils.id(`layered.oncetoken2049.443e20e5`), // Replace with your own salt, WAGMI!
         [{  
             roleToCreate: hre.ethers.utils.id("LAYERED_ONCE_UPDATE_ROLE"), 
             membersToAdd: [initialAdmin], // Adds the update role to the initialAdmin
@@ -103,8 +103,8 @@ async function generateEncodedDeployOnceFunctionData() {
             }],
             pluginInitializer: erc721Init.address,
             pluginInitializerCallData: erc721Init.interface.encodeFunctionData('init', [
-                "Example",
-                "EXT",
+                "ONCE Token2049",
+                "OEST",
                 ""
             ])
         }, // Add a callback address here if desired

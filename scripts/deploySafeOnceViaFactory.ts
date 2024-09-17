@@ -48,23 +48,9 @@ async function deployOnceAndInstallSafe() {
             roleAdmin: hre.ethers.constants.HashZero
         }], // Add any additional roles here
         {
-            initialUpdateInstructions: [{
-                pluginAddress: safeProxySingletonAddress,
-                action: UpdateActionType.add,
-                functionSelectors: safeProxySelectors
-            }],
-            pluginInitializer: safeInit.address,
-            pluginInitializerCallData: safeInit.interface.encodeFunctionData('init', [
-                safeProxySingletonAddress,
-                [deployer.address],
-                1,
-                hre.ethers.constants.AddressZero,
-                hre.ethers.constants.HashZero,
-                '0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99', // Compatibility fallback handler for 1.4.1
-                hre.ethers.constants.AddressZero,
-                0,
-                hre.ethers.constants.AddressZero
-            ])
+            initialUpdateInstructions: [],
+            pluginInitializer: hre.ethers.constants.AddressZero,
+            pluginInitializerCallData: hre.ethers.constants.HashZero
         },
         hre.ethers.constants.AddressZero,
     )
@@ -94,6 +80,26 @@ async function deployOnceAndInstallSafe() {
         newOnceAddress,
         deployer
     )
+
+    console.log("updating ONCE with SAFE Plugin")
+
+    await newOncePluginManager.update([{
+        pluginAddress: safeProxySingletonAddress,
+        action: UpdateActionType.add,
+        functionSelectors: safeProxySelectors
+    }],
+    safeInit.address,
+    safeInit.interface.encodeFunctionData('init', [
+        safeProxySingletonAddress,
+        [deployer.address],
+        1,
+        hre.ethers.constants.AddressZero,
+        hre.ethers.constants.HashZero,
+        '0xfd0732Dc9E303f09fCEf3a7388Ad10A83459Ec99', // Compatibility fallback handler for 1.4.1
+        hre.ethers.constants.AddressZero,
+        0,
+        hre.ethers.constants.AddressZero
+    ]))
 
     await newOncePluginManager.updateDefaultFallback(safeProxySingletonAddress);
 

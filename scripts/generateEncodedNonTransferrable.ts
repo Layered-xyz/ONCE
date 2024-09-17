@@ -1,7 +1,7 @@
 /* global ethers */
 /* eslint prefer-const: "off" */
 
-import { OnceFactory__factory, AccessControl__factory, SafeProxyInit__factory, SafeProxy__factory, PluginManager__factory, ERC721Init__factory, ERC721__factory, ERC721AutoIncrementMintInit__factory, ERC721AutoIncrementMint__factory } from "../typechain";
+import { OnceFactory__factory, AccessControl__factory, SafeProxyInit__factory, SafeProxy__factory, PluginManager__factory, ERC721Init__factory, ERC721__factory, ERC721AutoIncrementMintInit__factory, ERC721AutoIncrementMint__factory, ERC721NonTransferable__factory, ERC721NonTransferableInit, ERC721BalanceLimitInit__factory, ERC721NonTransferableInit__factory } from "../typechain";
 import { ContractList, getDeployedContracts } from "../utils/helpers";
 import hre from 'hardhat';
 
@@ -34,18 +34,18 @@ async function generateEncodedDeployOnceFunctionData() {
     // Replace with any other plugin you'd like to install
     // If installing multiple plugins in once transaction remember to create a custom init contract
 
-    const erc721AutoIncrementMintInit = ERC721AutoIncrementMintInit__factory.connect(
-        deployedContracts[hre.network.name]["ERC721AutoIncrementMintInit"],
+    const erc721NonTransferableInit = ERC721NonTransferableInit__factory.connect(
+        deployedContracts[hre.network.name]["ERC721NonTransferableInit"],
         deployer
     )
 
-    const erc721AutoIncrementMint = ERC721AutoIncrementMint__factory.connect(
-        deployedContracts[hre.network.name]["ERC721AutoIncrementMint"],
+    const erc721NonTransferable = ERC721NonTransferable__factory.connect(
+        deployedContracts[hre.network.name]["ERC721NonTransferable"],
         deployer
     )
 
-    const erc721Selectors = await erc721AutoIncrementMint.getFunctionSelectors();
-    const erc721SingletonAddress = await erc721AutoIncrementMint.getSingletonAddress();
+    const erc721Selectors = await erc721NonTransferable.getFunctionSelectors();
+    const erc721SingletonAddress = await erc721NonTransferable.getSingletonAddress();
 
     const encodedUpdateFunctionData = await oncePluginManager.interface.encodeFunctionData("update", [
         [{
@@ -53,11 +53,9 @@ async function generateEncodedDeployOnceFunctionData() {
             action: UpdateActionType.add,
             functionSelectors: erc721Selectors
         }],
-        erc721AutoIncrementMintInit.address,
-        erc721AutoIncrementMintInit.interface.encodeFunctionData('init', [
-            hre.ethers.utils.parseEther("0"),
-            BigInt(0),
-            "ipfs://QmS5BvTN3aUjtBEMrgJxt5ps5vCMz8rGqJhhwx4PmGb3LH"
+        erc721NonTransferableInit.address,
+        erc721NonTransferableInit.interface.encodeFunctionData('init', [
+            erc721NonTransferable.address,
         ])
     ])
     
